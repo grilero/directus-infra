@@ -1,5 +1,5 @@
 {
-	"name": "binary-answer",
+	"name": "test-hook",
 	"description": "Please enter a description for your extension",
 	"icon": "extension",
 	"version": "1.0.0",
@@ -25,5 +25,8 @@
 	},
 	"devDependencies": {
 		"@directus/extensions-sdk": "12.1.2"
+	},
+	"dependencies": {
+		"@directus/errors": "^1.0.1"
 	}
 }
