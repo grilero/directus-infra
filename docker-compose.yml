@@ -25,9 +25,7 @@ services:
 
   directus:
     container_name: directus
-    build:
-      context: "./directus/"
-      dockerfile: Dockerfile
+    image: directus/directus:latest
     ports:
       - "8055:8055"
     volumes:
