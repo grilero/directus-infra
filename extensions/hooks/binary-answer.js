@@ -23,7 +23,7 @@ module.exports = function registerHook({ filter }) {
       }
 
       // Validation: Multiple Answers type should have between 2 and 4 "1"s
-      if (question_type === 'multiple_answers') {
+      if (question_type === 'multiple_answers')oo {
         const countOnes = binaryString.split('1').length - 1;
         if (countOnes < 2 || countOnes > 4) {
           throw new Error('Multiple Answer questions must have between 2 and 4 correct answers.');
