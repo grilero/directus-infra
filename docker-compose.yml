@@ -30,7 +30,7 @@ services:
       - "8055:8055"
     volumes:
       - ./uploads:/directus/uploads
-      - ./certs/supabase-ca.crt:/directus/supabase-ca.crt:ro
+      - ./extensions:/directus/extensions
     networks:
       - directus
     environment:
@@ -45,9 +45,13 @@ services:
       ADMIN_EMAIL: "${DIRECTUS_ADMIN_EMAIL}"
       ADMIN_PASSWORD: "${DIRECTUS_ADMIN_PASSWORD}"
       PUBLIC_URL: "https://content.grile.ro"
-      DB_SSL: "true"
-      DB_SSL_CA: "/directus/supabase-ca.crt"
-      DB_SSL_REJECT_UNAUTHORIZED: "false"    
+      DB_SSL__REJECT_UNAUTHORIZED: false
+      WEBSOCKETS_ENABLED: true
+      STORAGE_LOCATIONS: s3
+      STORAGE_S3_DRIVER: s3
+      STORAGE_S3_BUCKET: directus-storage-grile-ro
+      STORAGE_S3_REGION: eu-central-1
+      STORAGE_S3_ENDPOINT: s3.amazonaws.com
 
 networks:
   directus:
