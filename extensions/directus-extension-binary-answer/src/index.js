@@ -22,6 +22,8 @@ export default ({ filter }) => {
     choices.forEach((choice, index) => {
       if (selected_answers.includes(choice)) {
         binaryAnswer[index] = "1";
+      } else {
+        binaryAnswer[index] = "0";
       }
     });
 
@@ -46,7 +48,9 @@ export default ({ filter }) => {
     }
 
     // Set the binary string as the answer
+    console.log("-----------\ninput.answer---------", binaryString);
     input.answer = binaryString;
+
 
     return input;
   });
@@ -56,7 +60,7 @@ export default ({ filter }) => {
     console.log("-----------\ninput---------", input);
     if (collection !== "Questions") return input;
     const choices = ["a", "b", "c", "d", "e"];
-
+    console.log("-----------\nchoices---------", choices);
     const { question_type, selected_answers } = input;
 
     if (!selected_answers || !choices) {
@@ -72,6 +76,8 @@ export default ({ filter }) => {
     choices.forEach((choice, index) => {
       if (selected_answers.includes(choice)) {
         binaryAnswer[index] = "1";
+      } else {
+        binaryAnswer[index] = "0";
       }
     });
 
@@ -96,6 +102,7 @@ export default ({ filter }) => {
     }
 
     // Set the binary string as the answer
+    console.log("-----------\ninput.answer---------", binaryString);
     input.answer = binaryString;
 
     return input;
