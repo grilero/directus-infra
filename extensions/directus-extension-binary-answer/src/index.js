@@ -3,7 +3,9 @@ import { InvalidPayloadError } from "@directus/errors";
 export default ({ filter }) => {
   // Filter for item creation in the "quiz_questions" collection
   filter('items.create', async (input, { collection }) => {
-    if (collection !== 'quiz_questions') return input;
+    console.log('-----------\ninput---------', input);
+    console.log('-----------\ncollection---------', collection);
+    if (collection !== 'Questions') return input;
 
     const { question_type, selected_answers, choices } = input;
 
@@ -41,8 +43,8 @@ export default ({ filter }) => {
 
   // Filter for item updates in the "quiz_questions" collection
   filter('items.update', async (input, { collection }) => {
-    if (collection !== 'quiz_questions') return input;
-
+    console.log('-----------\ninput---------', input);
+    if (collection !== 'Questions') return input;
     const { question_type, selected_answers, choices } = input;
 
     if (!selected_answers || !choices) {
