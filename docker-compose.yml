@@ -46,7 +46,7 @@ services:
       SECRET: "${DIRECTUS_SECRET}"
       ADMIN_EMAIL: "${DIRECTUS_ADMIN_EMAIL}"
       ADMIN_PASSWORD: "${DIRECTUS_ADMIN_PASSWORD}"
-      PUBLIC_URL: "https://your-domain.com"
+      PUBLIC_URL: "https://content.grile.ro"
       DB_SSL: "true"
       DB_SSL_CA: "/directus/supabase-ca.crt"
       DB_SSL_REJECT_UNAUTHORIZED: "true"

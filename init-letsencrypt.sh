@@ -5,7 +5,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(grile.ro www.grile.ro) # Add your domain name(s) here
+domains=(content.grile.ro) # Add your domain name(s) here
 rsa_key_size=4096
 data_path="./certbot" # Add your path to certbot data here
 email="rogrile@gmail.com" # Adding a valid address is strongly recommended
