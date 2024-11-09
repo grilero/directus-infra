@@ -1,6 +1,30 @@
 version: "3.8"
 
 services:
+  nginx:
+    image: nginx:1.23-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - directus
+    depends_on:
+      - directus
+
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - directus
+
   directus:
     container_name: directus
     build:
@@ -10,36 +34,28 @@ services:
       - "8055:8055"
     volumes:
       - ./uploads:/directus/uploads
+      - ./supabase_db_user.txt:/run/secrets/supabase_db_user
+      - ./supabase_db_password.txt:/run/secrets/supabase_db_password
+      - ./supabase_db_name.txt:/run/secrets/supabase_db_name
+      - ./supabase_host.txt:/run/secrets/supabase_host
+      - ./directus_secret.txt:/run/secrets/directus_secret
+      - ./directus_key.txt:/run/secrets/directus_key
+      - ./directus_admin_email.txt:/run/secrets/directus_admin_email
+      - ./directus_admin_pass.txt:/run/secrets/directus_admin_pass
     networks:
       - directus
-    secrets:
-      - supabase_db_user
-      - supabase_db_password
-      - supabase_db_name
-      - supabase_host
     environment:
       DB_CLIENT: "pg"
-      DB_HOST_FILE: "/run/secrets/supabase_host"
+      DB_HOST_FILE: "/run/secrets/supabase_host"            # Path for the database host
       DB_PORT: "5432"
-      DB_DATABASE_FILE: "/run/secrets/supabase_db_name"
-      DB_USER_FILE: "/run/secrets/supabase_db_user"
-      DB_PASSWORD_FILE: "/run/secrets/supabase_db_password"
-      DB_SSL: "true"                               # Enable SSL for DB connection
-      DB_SSL__REJECT_UNAUTHORIZED: "true"          # Enforce certificate validation
-      DB_SSL_CA_FILE: "/run/secrets/supabase_ca"   # Path to CA certificate (optional)
-      PUBLIC_URL: "https://content.grile.ro"
+      DB_DATABASE_FILE: "/run/secrets/supabase_db_name"     # Path for the database name
+      DB_USER_FILE: "/run/secrets/supabase_db_user"         # Path for the database user
+      DB_PASSWORD_FILE: "/run/secrets/supabase_db_password" # Path for the database password
+      KEY_FILE: "/run/secrets/directus_key"                 # Path for Directus key
+      SECRET_FILE: "/run/secrets/directus_secret"           # Path for Directus secret
+      ADMIN_EMAIL_FILE: "/run/secrets/directus_admin_email" # Path for admin email
+      ADMIN_PASSWORD_FILE: "/run/secrets/directus_admin_pass" # Path for admin password
+      PUBLIC_URL: "https://grile.ro"                 # Replace with your actual domain
 
 networks:
   directus:
-
-secrets:
-  supabase_db_user:
-    external: true
-  supabase_db_password:
-    external: true
-  supabase_db_name:
-    external: true
-  supabase_host:
-    external: true
-  supabase_ca:
-    external: true  # Add CA certificate as a secret if needed
