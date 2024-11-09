@@ -1,1 +1,5 @@
 .env
+certs/*
+certs/
+certs
+./certs/*
