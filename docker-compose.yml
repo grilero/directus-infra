@@ -34,6 +34,7 @@ services:
       - "8055:8055"
     volumes:
       - ./uploads:/directus/uploads
+      - ./certs/supabase-ca.crt:/directus/supabase-ca.crt:ro  # Mount the CA certificate for SSL
     networks:
       - directus
     environment:
@@ -48,6 +49,7 @@ services:
       ADMIN_EMAIL: "${DIRECTUS_ADMIN_EMAIL}"
       ADMIN_PASSWORD: "${DIRECTUS_ADMIN_PASSWORD}"
       PUBLIC_URL: "https://your-domain.com"
-
-networks:
-  directus:
+      # SSL Configuration
+      DB_SSL: "true"
+      DB_SSL_CA: "/directus/supabase-ca.crt"     # Path to CA certificate inside container
+      DB_SSL_REJECT_UNAUTHORIZED: "true"         # Enforce SSL validation
