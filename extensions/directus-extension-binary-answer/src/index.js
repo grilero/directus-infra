@@ -83,6 +83,7 @@ export default ({ filter }) => {
 
     const binaryString = binaryAnswer.join("");
     const countOnes = binaryString.split("1").length - 1;
+    console.log('CountONes', countOnes)
 
     // Validate based on question type
     if (question_type === "single_answer" && countOnes !== 1) {
