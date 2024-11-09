@@ -96,6 +96,7 @@ export default ({ filter }) => {
       question_type === "multiple_answers" &&
       (countOnes < 2 || countOnes > 4)
     ) {
+      console.log('WTF?')
       throw new InvalidPayloadError({
         reason:
           "Multiple Answer questions must have between 2 and 4 correct answers.",
