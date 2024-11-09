@@ -1,3 +1,3 @@
-FROM directus/directus:9.18.1
+FROM directus/directus:11.2.1
 
 RUN npm install directus-extension-editorjs
