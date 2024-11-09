@@ -1,5 +1,5 @@
 {
-	"name": "test-hook",
+	"name": "directus-extension-test-hook",
 	"description": "Please enter a description for your extension",
 	"icon": "extension",
 	"version": "1.0.0",
