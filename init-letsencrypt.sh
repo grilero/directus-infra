@@ -5,10 +5,10 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(example.com www.example.com) # Add your domain name(s) here
+domains=(grile.ro www.grile.ro) # Add your domain name(s) here
 rsa_key_size=4096
 data_path="./certbot" # Add your path to certbot data here
-email="admin@example.com" # Adding a valid address is strongly recommended
+email="rogrile@gmail.com" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
