@@ -47,7 +47,7 @@ services:
       PUBLIC_URL: "https://content.grile.ro"
       DB_SSL: "true"
       DB_SSL_CA: "/directus/supabase-ca.crt"
-      DB_SSL_REJECT_UNAUTHORIZED: "true"
+      DB_SSL_REJECT_UNAUTHORIZED: "false"    
 
 networks:
   directus:
