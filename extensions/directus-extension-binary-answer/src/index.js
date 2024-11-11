@@ -90,9 +90,7 @@ export default ({ filter }) => {
       throw new InvalidPayloadError({
         reason: "Single Answer questions must have exactly one correct answer.",
       });
-    }
-
-    if (
+    } else if (
       question_type === "multiple_answers" &&
       (countOnes < 2 || countOnes > 4)
     ) {
