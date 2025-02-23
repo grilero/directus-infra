@@ -22,6 +22,13 @@ services:
       - ./certbot/www:/var/www/certbot
     networks:
       - directus
+  certbot-renewal:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: sh -c "while true; do certbot renew --quiet && sleep 24h; done"
+    restart: unless-stopped
 
   directus:
     container_name: directus
@@ -55,7 +62,6 @@ services:
       STORAGE_S3_REGION: eu-central-1
       STORAGE_S3_ENDPOINT: s3.amazonaws.com
       EXTENSIONS_AUTO_RELOAD: true
-      
 
 networks:
   directus:
