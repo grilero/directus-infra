@@ -14,14 +14,6 @@ services:
     depends_on:
       - directus
 
-  certbot:
-    image: certbot/certbot
-    restart: unless-stopped
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    networks:
-      - directus
   certbot-renewal:
     image: certbot/certbot
     volumes:
