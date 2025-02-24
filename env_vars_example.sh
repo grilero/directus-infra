@@ -1,0 +1,22 @@
+export SUPABASE_HOST="your_supabase_host"
+export SUPABASE_DB_NAME="your_database_name"
+export SUPABASE_DB_USER="your_database_user"
+export SUPABASE_DB_PASSWORD="your_database_password"
+export DIRECTUS_KEY="your_directus_key"
+export DIRECTUS_SECRET="your_directus_secret"
+export DIRECTUS_ADMIN_EMAIL="your_admin_email"
+export DIRECTUS_ADMIN_PASSWORD="your_admin_password"
+export DIRECTUS_ACCESS_KEY="your_s3_access_key"
+export DIRECTUS_ACCESS_SECRET="your_s3_access_secret"
+
+
+SUPABASE_DB_USER=redacted
+SUPABASE_DB_PASSWORD=redacted
+SUPABASE_DB_NAME=redacted
+SUPABASE_HOST=redacted
+DIRECTUS_ADMIN_EMAIL=redacted
+DIRECTUS_ADMIN_PASSWORD=redacted
+DIRECTUS_KEY=redacted
+DIRECTUS_SECRET=redacted
+DIRECTUS_ACCESS_KEY=redacted
+DIRECTUS_ACCESS_SECRET=redacted

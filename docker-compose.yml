@@ -46,13 +46,20 @@ services:
       PUBLIC_URL: "https://content.grile.ro"
       DB_SSL__REJECT_UNAUTHORIZED: false
       WEBSOCKETS_ENABLED: true
-      STORAGE_LOCATIONS: s3
+      STORAGE_LOCATIONS: s3_private,s3_public
       STORAGE_S3_DRIVER: s3
-      STORAGE_S3_KEY: "${DIRECTUS_ACCESS_KEY}"
-      STORAGE_S3_SECRET: "${DIRECTUS_ACCESS_SECRET}"
-      STORAGE_S3_BUCKET: directus-storage-grile-ro
-      STORAGE_S3_REGION: eu-central-1
-      STORAGE_S3_ENDPOINT: s3.amazonaws.com
+      STORAGE_S3_PRIVATE_KEY: "${DIRECTUS_ACCESS_KEY}"
+      STORAGE_S3_PRIVATE_SECRET: "${DIRECTUS_ACCESS_SECRET}"
+      STORAGE_S3_PRIVATE_BUCKET: directus-storage-grile-ro
+      STORAGE_S3_PRIVATE_REGION: eu-central-1
+      STORAGE_S3_PRIVATE_ENDPOINT: s3.amazonaws.com
+      STORAGE_S3_PUBLIC_DRIVER: s3
+      STORAGE_S3_PUBLIC_KEY: "${DIRECTUS_ACCESS_KEY}"
+      STORAGE_S3_PUBLIC_SECRET: "${DIRECTUS_ACCESS_SECRET}"
+      STORAGE_S3_PUBLIC_BUCKET: directus-storage-grile-ro
+      STORAGE_S3_PUBLIC_REGION: eu-central-1
+      STORAGE_S3_PUBLIC_ENDPOINT: s3.amazonaws.com
+
       EXTENSIONS_AUTO_RELOAD: true
 
 networks:

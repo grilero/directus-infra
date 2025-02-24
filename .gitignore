@@ -4,3 +4,4 @@ certs/
 certs
 ./certs/*
 certbot/
+env_vars.sh
