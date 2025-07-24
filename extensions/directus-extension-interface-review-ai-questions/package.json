@@ -6,6 +6,16 @@
     "build": "vite build",
     "dev": "vite"
   },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "directus:extension": {
+    "type": "interface",
+    "path": "dist/index.js",
+    "source": "src/index.ts",
+    "host": "^10.10.0"
+  },
   "dependencies": {
     "@directus/sdk": "^11.0.0",
     "vue": "^3.4.0"
