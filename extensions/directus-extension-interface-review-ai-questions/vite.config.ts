@@ -11,7 +11,7 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['vue', '@directus/sdk'],
+      external: ['vue', '@directus/extensions-sdk'],
     },
     emptyOutDir: true,
   },

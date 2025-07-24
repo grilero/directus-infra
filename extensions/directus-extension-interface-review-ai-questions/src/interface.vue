@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { acceptQuestion, declineQuestion } from './api';
-import { Directus } from '@directus/sdk';
+import { useApi, useAuth } from '@directus/extensions-sdk';
 
 interface AIQuestion {
   id: number;
@@ -17,27 +17,29 @@ interface AIQuestion {
 
 const questions = ref<AIQuestion[]>([]);
 const expanded = ref<number | null>(null);
-const directus = new Directus(window.location.origin + '/');
+
+const api = useApi();
+const auth = useAuth();
 
 async function fetchQuestions() {
-  const { data } = await directus.items('ai_question_staging').readByQuery({
-    filter: { status: { _eq: 'pending_review' } },
-    fields: ['*', {
-      answer_options: ['id', 'option_text', 'is_correct']
-    }]
+  const { data } = await api.get('/items/ai_question_staging', {
+    params: {
+      filter: { status: { _eq: 'pending_review' } },
+      fields: '*.*,answer_options.*',
+    },
   });
   questions.value = data as AIQuestion[];
 }
 
 async function onAccept(id: number) {
-  await acceptQuestion(id, (await directus.auth.me()).id);
+  await acceptQuestion(api, id, auth.user!.id);
   await fetchQuestions();
 }
 
 async function onDecline(id: number) {
   const reason = prompt('Reason for decline?');
   if (!reason) return;
-  await declineQuestion(id, (await directus.auth.me()).id, reason);
+  await declineQuestion(api, id, auth.user!.id, reason);
   await fetchQuestions();
 }
 
