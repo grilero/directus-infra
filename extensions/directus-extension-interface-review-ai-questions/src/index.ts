@@ -7,6 +7,7 @@ export default defineLayout({
   icon: 'task_alt',
   description: 'Review and approve/decline AI-generated questions',
   component: Interface,
+  types: ['collection'],
   // Specify the minimum Directus version if needed
   minimumDirectusVersion: "10.10.0",
 }); 
