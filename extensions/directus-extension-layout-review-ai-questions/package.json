@@ -1,5 +1,5 @@
 {
-  "name": "directus-extension-interface-review-ai-questions",
+  "name": "directus-extension-layout-review-ai-questions",
   "version": "0.0.1",
   "main": "dist/index.js",
   "scripts": {
