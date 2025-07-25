@@ -1,7 +1,56 @@
+# Environment Files
 .env
-certs/*
-certs/
-certs
-./certs/*
-certbot/
+.env.local
+.env.production
 env_vars.sh
+env_setup.sh
+
+# SSL Certificates & Keys
+certs/
+certbot/conf/live/
+certbot/conf/archive/
+certbot/conf/renewal/
+*.key
+*.pem
+*.crt
+
+# Docker
+.dockerignore
+
+# Directus Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Extension Node Modules & Build Output
+extensions/*/node_modules/
+extensions/*/dist/
+extensions/*/.pnpm/
+extensions/*/pnpm-lock.yaml
+
+# Scripts Dependencies
+scripts/node_modules/
+scripts/.env
+
+# IDE/Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary Files
+*.tmp
+*.temp
+temp/
+
+# Backup Files
+*.bak
+backup/

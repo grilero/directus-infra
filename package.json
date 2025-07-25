@@ -1,0 +1,60 @@
+{
+  "name": "directus-infra",
+  "version": "1.0.0",
+  "description": "Directus infrastructure with Supabase and AI-powered extensions",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm run db:create && npm run directus:start && npm run directus:bootstrap && npm run bootstrap:metadata && npm run directus:restart",
+    "dev:clean": "npm run db:reset && npm run db:seed && npm run directus:start && npm run directus:bootstrap && npm run bootstrap:metadata && npm run directus:restart",
+    "dev:down": "docker-compose -f docker-compose.local.yml down && supabase stop",
+    "dev:logs": "docker-compose -f docker-compose.local.yml logs -f directus",
+    "dev:restart": "npm run dev:down && npm run dev",
+    "db:create": "supabase start",
+    "db:reset": "supabase db reset --local",
+    "directus:start": "docker-compose -f docker-compose.local.yml up -d && npm run directus:wait",
+    "directus:wait": "timeout 60 bash -c 'until curl -sf http://localhost:8055/server/health; do sleep 2; echo \"Waiting for Directus...\"; done' && sleep 5",
+    "directus:bootstrap": "docker exec directus-local npx directus bootstrap",
+    "directus:restart": "docker restart directus-local && npm run directus:wait",
+    "bootstrap:metadata": "node scripts/add-directus-metadata.js && node scripts/configure-field-metadata.js",
+    "db:seed": "psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/seed.sql",
+    "bootstrap:local": "node scripts/add-directus-metadata.js",
+    "bootstrap:dev": "npm run remote:dev:schema && npm run remote:dev:seed && npm run remote:dev:metadata",
+    "bootstrap:prod": "npm run remote:prod:schema && npm run remote:prod:metadata",
+    "remote:dev:schema": "supabase migration up --project-ref sbpqgoclsbmysycejelx",
+    "remote:dev:seed": "echo 'Apply dev seed data manually: psql \"your-dev-supabase-connection-string\" -f scripts/dev-seed.sql'",
+    "remote:dev:metadata": "SUPABASE_PROJECT_REF=sbpqgoclsbmysycejelx node scripts/remote-bootstrap.js dev",
+    "remote:prod:schema": "supabase migration up --project-ref YOUR_PROD_PROJECT_REF",
+    "remote:prod:metadata": "SUPABASE_PROJECT_REF=YOUR_PROD_PROJECT_REF node scripts/remote-bootstrap.js production",
+    "seed:local": "supabase db reset --local",
+    "seed:dev": "SUPABASE_PROJECT_REF=sbpqgoclsbmysycejelx supabase db reset",
+    "seed:prod": "echo 'Use with caution: SUPABASE_PROJECT_REF=your-prod-ref supabase db reset'",
+    "build:extensions": "npm run build:layout && npm run build:interface",
+    "build:layout": "cd extensions/directus-extension-layout-review-ai-questions && npm run build",
+    "build:interface": "cd extensions/directus-extension-interface-search-chapters && npm run build",
+    "migration:new": "supabase migration new",
+    "migration:apply": "supabase db push",
+    "db:diff": "supabase db diff --schema public",
+    "db:reset": "supabase db reset",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "test:health": "curl -f http://localhost:8055/server/health",
+    "test:connection": "node scripts/test-connection.js"
+  },
+  "keywords": [
+    "directus",
+    "supabase",
+    "cms",
+    "ai",
+    "postgresql"
+  ],
+  "author": "Grile.ro",
+  "license": "MIT",
+  "dependencies": {
+    "@directus/sdk": "^17.0.0",
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

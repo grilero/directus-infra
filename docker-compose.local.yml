@@ -1,0 +1,30 @@
+services:
+  directus:
+    container_name: directus-local
+    image: directus/directus:latest
+    ports:
+      - "8055:8055"
+    volumes:
+      - ./uploads:/directus/uploads
+      - ./extensions:/directus/extensions
+    env_file:
+      - ./.env.local
+    environment:
+      # Override for local development
+      - EXTENSIONS_AUTO_RELOAD=true
+      - LOG_LEVEL=debug
+      - CACHE_ENABLED=false
+    networks:
+      - directus-local
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8055/server/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+
+networks:
+  directus-local:
+    driver: bridge

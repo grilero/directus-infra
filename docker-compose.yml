@@ -19,8 +19,10 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    entrypoint: sh -c "while true; do certbot renew --quiet && sleep 24h; done"
+    entrypoint: sh -c "while true; do certbot renew --quiet && sleep 12h; done"
     restart: unless-stopped
+    depends_on:
+      - nginx
 
   directus:
     container_name: directus
@@ -32,35 +34,10 @@ services:
       - ./extensions:/directus/extensions
     networks:
       - directus
+    env_file:
+      - ./.env
     environment:
-      DB_CLIENT: "pg"
-      DB_HOST: "${SUPABASE_HOST}"
-      DB_PORT: "5432"
-      DB_DATABASE: "${SUPABASE_DB_NAME}"
-      DB_USER: "${SUPABASE_DB_USER}"
-      DB_PASSWORD: "${SUPABASE_DB_PASSWORD}"
-      KEY: "${DIRECTUS_KEY}"
-      SECRET: "${DIRECTUS_SECRET}"
-      ADMIN_EMAIL: "${DIRECTUS_ADMIN_EMAIL}"
-      ADMIN_PASSWORD: "${DIRECTUS_ADMIN_PASSWORD}"
-      PUBLIC_URL: "https://content.grile.ro"
-      DB_SSL__REJECT_UNAUTHORIZED: false
-      WEBSOCKETS_ENABLED: true
-      STORAGE_LOCATIONS: s3_private,s3_public
-      STORAGE_S3_DRIVER: s3
-      STORAGE_S3_PRIVATE_KEY: "${DIRECTUS_ACCESS_KEY}"
-      STORAGE_S3_PRIVATE_SECRET: "${DIRECTUS_ACCESS_SECRET}"
-      STORAGE_S3_PRIVATE_BUCKET: directus-storage-grile-ro
-      STORAGE_S3_PRIVATE_REGION: eu-central-1
-      STORAGE_S3_PRIVATE_ENDPOINT: s3.amazonaws.com
-      STORAGE_S3_PUBLIC_DRIVER: s3
-      STORAGE_S3_PUBLIC_KEY: "${DIRECTUS_ACCESS_KEY}"
-      STORAGE_S3_PUBLIC_SECRET: "${DIRECTUS_ACCESS_SECRET}"
-      STORAGE_S3_PUBLIC_BUCKET: directus-storage-grile-ro
-      STORAGE_S3_PUBLIC_REGION: eu-central-1
-      STORAGE_S3_PUBLIC_ENDPOINT: s3.amazonaws.com
-
-      EXTENSIONS_AUTO_RELOAD: true
+      - EXTENSIONS_AUTO_RELOAD=false
 
 networks:
   directus:

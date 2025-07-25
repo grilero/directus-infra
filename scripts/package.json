@@ -1,0 +1,27 @@
+{
+  "name": "directus-bootstrap-scripts",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Scripts to bootstrap Directus collections and configurations for Grile.ro platform",
+  "scripts": {
+    "bootstrap": "node bootstrap-collections.js",
+    "full-bootstrap": "node full-bootstrap.js",
+    "create-from-scratch": "node full-bootstrap-from-scratch.js",
+    "fresh-bootstrap": "node fresh-bootstrap.js",
+    "seed": "psql $DATABASE_URL -f seed-data.sql",
+    "seed:local": "psql $LOCAL_DATABASE_URL -f seed-data.sql",
+    "seed:prod": "psql $PROD_DATABASE_URL -f seed-data.sql",
+    "fresh-setup": "npm run fresh-bootstrap && npm run seed",
+    "fresh-setup:local": "npm run fresh-bootstrap && npm run seed:local",
+    "fresh-setup:prod": "npm run fresh-bootstrap && npm run seed:prod",
+    "analyze-duplicates": "node analyze-duplicates.js",
+    "test-connection": "node test-connection.js",
+    "test-connection:local": "PUBLIC_URL=http://localhost:8055 node test-connection.js",
+    "test-connection:prod": "PUBLIC_URL=$PROD_PUBLIC_URL node test-connection.js",
+    "help": "echo 'Available commands:\\n  🚀 Fresh Setup:\\n    npm run fresh-setup       - Complete fresh setup (bootstrap + seed)\\n    npm run fresh-setup:local - Fresh setup for local development\\n    npm run fresh-setup:prod  - Fresh setup for production\\n\\n  🔧 Individual Operations:\\n    npm run fresh-bootstrap   - Create collections via Directus API\\n    npm run seed              - Seed database with existing data\\n    npm run seed:local        - Seed local database\\n    npm run seed:prod         - Seed production database\\n\\n  🧪 Testing & Analysis:\\n    npm run test-connection   - Test Directus API connection\\n    npm run analyze-duplicates - Analyze duplicate collections\\n\\n  📚 Legacy Commands:\\n    npm run bootstrap         - Bootstrap missing collections only\\n    npm run full-bootstrap    - Complete platform setup (existing DB)\\n    npm run create-from-scratch - Create collections AND database tables'"
+  },
+  "dependencies": {
+    "@directus/sdk": "^17.0.0",
+    "dotenv": "^16.4.0"
+  }
+}
