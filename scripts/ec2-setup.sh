@@ -63,7 +63,7 @@ server {
     client_max_body_size 1G;
     
     location / {
-        proxy_pass http://directus:8055;
+        proxy_pass http://host.docker.internal:8055;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -100,7 +100,7 @@ server {
     client_max_body_size 1G;
     
     location / {
-        proxy_pass http://directus-prod:8055;
+        proxy_pass http://host.docker.internal:8056;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

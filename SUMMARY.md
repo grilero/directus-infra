@@ -67,24 +67,21 @@ Added deployment commands:
 ### 📋 Required GitHub Secrets
 User needs to add these secrets to GitHub repo for automation:
 
-**SSH Access:**
+**SSH Access (Same EC2 for both):**
 - `DEV_HOST`, `DEV_USER`, `DEV_SSH_PRIVATE_KEY`
 - `PROD_HOST`, `PROD_USER`, `PROD_SSH_PRIVATE_KEY`
 
 **Development Environment:**
 - `DEV_DIRECTUS_KEY`, `DEV_DIRECTUS_SECRET`
 - `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD`
-- `DEV_PUBLIC_URL`, `DEV_DB_HOST`, `DEV_DB_PASSWORD`
-- `DEV_S3_BUCKET`
+- `DEV_PUBLIC_URL`, `DEV_DB_HOST`, `DEV_DB_USER`, `DEV_DB_PASSWORD`
+- `SUPABASE_PROJECT_URL_DEV`, `SUPABASE_ANON_KEY_DEV`
 
 **Production Environment:**
 - `PROD_DIRECTUS_KEY`, `PROD_DIRECTUS_SECRET`
 - `PROD_ADMIN_EMAIL`, `PROD_ADMIN_PASSWORD`  
-- `PROD_PUBLIC_URL`, `PROD_DB_HOST`, `PROD_DB_PASSWORD`
-- `PROD_S3_BUCKET`
-
-**AWS Configuration:**
-- `AWS_ACCESS_KEY`, `AWS_SECRET_KEY`
+- `PROD_PUBLIC_URL`, `PROD_DB_HOST`, `PROD_DB_USER`, `PROD_DB_PASSWORD`
+- `SUPABASE_PROJECT_URL_PROD`, `SUPABASE_ANON_KEY_PROD`
 
 ### 🚀 Next Steps for User
 

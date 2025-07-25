@@ -28,7 +28,7 @@ services:
     container_name: directus-prod
     image: directus/directus:latest
     ports:
-      - "8055:8055"
+      - "8056:8055"
     volumes:
       - ./uploads:/directus/uploads
       - ./extensions:/directus/extensions
