@@ -8,7 +8,7 @@ interface AIQuestion {
   question_prompt: string;
   explanation: string | null;
   difficulty_level: string | null;
-  answer_options: {
+  ai_answer_options_staging: {
     id: number;
     option_text: string;
     is_correct: boolean;
@@ -24,8 +24,8 @@ const auth = useAuth();
 async function fetchQuestions() {
   const { data } = await api.get('/items/ai_question_staging', {
     params: {
-      filter: { status: { _eq: 'pending_review' } },
-      fields: '*.*,answer_options.*',
+      filter: { status: { _eq: 'pending' } },
+      fields: '*,ai_answer_options_staging.*',
     },
   });
   questions.value = data as AIQuestion[];
@@ -58,7 +58,7 @@ onMounted(fetchQuestions);
       <div v-if="expanded === q.id" class="card-body">
         <p><strong>Explanation:</strong> {{ q.explanation }}</p>
         <ul>
-          <li v-for="opt in q.answer_options" :key="opt.id"
+          <li v-for="opt in q.ai_answer_options_staging" :key="opt.id"
               :class="{ correct: opt.is_correct }">
             {{ opt.option_text }}
           </li>

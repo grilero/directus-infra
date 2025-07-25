@@ -1,6 +1,6 @@
-import { defineComponent as w, ref as f, onMounted as g, openBlock as u, createElementBlock as l, createElementVNode as a, Fragment as v, renderList as m, toDisplayString as _, createTextVNode as x, normalizeClass as C, createCommentVNode as h } from "vue";
-import { useApi as A, useAuth as I, defineLayout as Q } from "@directus/extensions-sdk";
-async function b(i, t, e) {
+import { defineComponent as k, ref as f, onMounted as w, openBlock as u, createElementBlock as l, createElementVNode as a, Fragment as v, renderList as m, toDisplayString as _, createTextVNode as x, normalizeClass as C, createCommentVNode as h } from "vue";
+import { useApi as A, useAuth as b, defineLayout as I } from "@directus/extensions-sdk";
+async function Q(i, t, e) {
   return i.post("/rpc/accept_ai_question", {
     p_question_id: t,
     p_user: e
@@ -16,27 +16,27 @@ async function D(i, t, e, o) {
 const R = { class: "ai-review-list" }, V = ["onClick"], E = {
   key: 0,
   class: "card-body"
-}, N = ["onClick"], $ = ["onClick"], B = /* @__PURE__ */ w({
+}, N = ["onClick"], $ = ["onClick"], B = /* @__PURE__ */ k({
   __name: "interface",
   setup(i) {
-    const t = f([]), e = f(null), o = A(), d = I();
+    const t = f([]), e = f(null), o = A(), d = b();
     async function p() {
       const { data: c } = await o.get("/items/ai_question_staging", {
         params: {
-          filter: { status: { _eq: "pending_review" } },
-          fields: "*.*,answer_options.*"
+          filter: { status: { _eq: "pending" } },
+          fields: "*,ai_answer_options_staging.*"
         }
       });
       t.value = c;
     }
-    async function y(c) {
-      await b(o, c, d.user.id), await p();
+    async function g(c) {
+      await Q(o, c, d.user.id), await p();
     }
-    async function k(c) {
+    async function y(c) {
       const s = prompt("Reason for decline?");
       s && (await D(o, c, d.user.id, s), await p());
     }
-    return g(p), (c, s) => (u(), l("div", R, [
+    return w(p), (c, s) => (u(), l("div", R, [
       s[1] || (s[1] = a("h2", null, "AI-Generated Questions Pending Review", -1)),
       (u(!0), l(v, null, m(t.value, (n) => (u(), l("div", {
         key: n.id,
@@ -52,16 +52,16 @@ const R = { class: "ai-review-list" }, V = ["onClick"], E = {
             x(" " + _(n.explanation), 1)
           ]),
           a("ul", null, [
-            (u(!0), l(v, null, m(n.answer_options, (r) => (u(), l("li", {
+            (u(!0), l(v, null, m(n.ai_answer_options_staging, (r) => (u(), l("li", {
               key: r.id,
               class: C({ correct: r.is_correct })
             }, _(r.option_text), 3))), 128))
           ]),
           a("button", {
-            onClick: (r) => y(n.id)
+            onClick: (r) => g(n.id)
           }, "Accept", 8, N),
           a("button", {
-            onClick: (r) => k(n.id)
+            onClick: (r) => y(n.id)
           }, "Decline", 8, $)
         ])) : h("", !0)
       ]))), 128))
@@ -73,7 +73,7 @@ const L = (i, t) => {
   for (const [o, d] of t)
     e[o] = d;
   return e;
-}, q = /* @__PURE__ */ L(B, [["__scopeId", "data-v-d14f2a1f"]]), G = Q({
+}, q = /* @__PURE__ */ L(B, [["__scopeId", "data-v-b6061f9a"]]), G = I({
   id: "review-ai-questions",
   name: "AI Questions Review",
   icon: "task_alt",
