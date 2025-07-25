@@ -31,6 +31,9 @@
     "build:extensions": "npm run build:layout && npm run build:interface",
     "build:layout": "cd extensions/directus-extension-layout-review-ai-questions && npm run build",
     "build:interface": "cd extensions/directus-extension-interface-search-chapters && npm run build",
+    "deploy:dev": "./scripts/deploy-dev.sh",
+    "deploy:prod": "./scripts/deploy-prod.sh",
+    "deploy:setup": "./scripts/ec2-setup.sh",
     "migration:new": "supabase migration new",
     "migration:apply": "supabase db push",
     "db:diff": "supabase db diff --schema public",
@@ -38,6 +41,8 @@
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "test:health": "curl -f http://localhost:8055/server/health",
+    "test:health:dev": "curl -f https://dev-content.grile.ro/health",
+    "test:health:prod": "curl -f https://content.grile.ro/health",
     "test:connection": "node scripts/test-connection.js"
   },
   "keywords": [

@@ -1,0 +1,55 @@
+services:
+  nginx:
+    image: nginx:1.23-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - directus
+    depends_on:
+      - directus
+
+  certbot-renewal:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: sh -c "while true; do certbot renew --quiet && sleep 12h; done"
+    restart: unless-stopped
+    depends_on:
+      - nginx
+
+  directus:
+    container_name: directus-prod
+    image: directus/directus:latest
+    ports:
+      - "8055:8055"
+    volumes:
+      - ./uploads:/directus/uploads
+      - ./extensions:/directus/extensions
+    networks:
+      - directus
+    env_file:
+      - ./.env.prod
+    environment:
+      - EXTENSIONS_AUTO_RELOAD=false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8055/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+networks:
+  directus:

@@ -1,0 +1,66 @@
+# Directus Configuration
+KEY=ccd85527e622a2b3d56605cc435bb0b3
+SECRET=c9acf71cd22d019b30163078ab33b77ed97d937e61e5402bbfbd0902975ab2b3
+
+# Admin User (for initial setup)
+ADMIN_EMAIL=admin@grile.ro
+ADMIN_PASSWORD=parola123
+
+# Database Configuration (Local Supabase)
+DB_CLIENT=pg
+DB_HOST=host.docker.internal
+DB_PORT=54322
+DB_DATABASE=postgres
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+# Public URL for local development
+PUBLIC_URL=http://localhost:8055
+
+# # Storage Configuration (Local file storage)
+# STORAGE_LOCATIONS=local
+# STORAGE_LOCAL_DRIVER=local
+# STORAGE_LOCAL_ROOT=./uploads
+
+# AWS S3 Configuration (for production, optional for local)
+STORAGE_S3_DRIVER=s3
+STORAGE_S3_KEY=2e236d04cb3e11c622a615a5ebf9c801
+STORAGE_S3_SECRET=b814fd076eb324b188fc896c05c80491bd3b8a8e0a1d01034078ebb5163e0e69
+STORAGE_S3_BUCKET=https://sbpqgoclsbmysycejelx.supabase.co/storage/v1/s3
+STORAGE_S3_REGION=eu-central-1
+
+# Extensions
+EXTENSIONS_PATH=./extensions
+EXTENSIONS_AUTO_RELOAD=true
+
+# Development Settings
+LOG_LEVEL=debug
+CACHE_ENABLED=false
+
+# Email Configuration (Optional for local development)
+EMAIL_FROM=no-reply@grile.ro
+EMAIL_TRANSPORT=smtp
+EMAIL_SMTP_HOST=mail.grile.ro
+EMAIL_SMTP_PORT=465
+EMAIL_SMTP_USER=noreply@grile.ro
+EMAIL_SMTP_PASSWORD=nm2QYDgdcsQYaDpn8JaR
+
+# Security
+CORS_ENABLED=true
+CORS_ORIGIN=true
+
+# Rate Limiting (Disabled for local development)
+RATE_LIMITER_ENABLED=false
+
+# Authentication
+# AUTH_PROVIDERS=default
+ACCESS_TOKEN_TTL=15m
+REFRESH_TOKEN_TTL=7d
+REFRESH_TOKEN_COOKIE_SECURE=false
+REFRESH_TOKEN_COOKIE_SAME_SITE=lax
+
+# File Upload
+MAX_PAYLOAD_SIZE=1gb
+
+# GraphQL
+GRAPHQL_SCHEMA_CACHE=false

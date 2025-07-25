@@ -1,0 +1,133 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: |
+          extensions/*/package-lock.json
+          scripts/package-lock.json
+
+    - name: Build Extensions
+      run: |
+        # Build AI Questions Review Layout
+        cd extensions/directus-extension-layout-review-ai-questions
+        npm ci
+        npm run build
+        cd ../..
+        
+        # Build Search Chapters Interface
+        cd extensions/directus-extension-interface-search-chapters
+        npm ci
+        npm run build
+        cd ../..
+
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.PROD_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Production Server
+      run: |
+        # Copy files to server
+        rsync -avz --delete \
+          --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='.env*' \
+          --exclude='certbot/conf' \
+          --exclude='uploads' \
+          ./ ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:~/directus-infra/
+
+    - name: Create environment file on server
+      run: |
+        ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
+          cd ~/directus-infra
+          cat > .env.prod << 'ENVEOF'
+        KEY=${{ secrets.PROD_DIRECTUS_KEY }}
+        SECRET=${{ secrets.PROD_DIRECTUS_SECRET }}
+        ADMIN_EMAIL=${{ secrets.PROD_ADMIN_EMAIL }}
+        ADMIN_PASSWORD=${{ secrets.PROD_ADMIN_PASSWORD }}
+        PUBLIC_URL=${{ secrets.PROD_PUBLIC_URL }}
+        DB_CLIENT=pg
+        DB_HOST=${{ secrets.PROD_DB_HOST }}
+        DB_PORT=5432
+        DB_DATABASE=postgres
+        DB_USER=${{ secrets.PROD_DB_USER }}
+        DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}
+        DB_SSL__REJECT_UNAUTHORIZED=false
+        STORAGE_LOCATIONS=s3_private,s3_public
+        STORAGE_S3_DRIVER=s3
+        STORAGE_S3_PRIVATE_KEY=${{ secrets.AWS_ACCESS_KEY }}
+        STORAGE_S3_PRIVATE_SECRET=${{ secrets.AWS_SECRET_KEY }}
+        STORAGE_S3_PRIVATE_BUCKET=${{ secrets.PROD_S3_BUCKET }}
+        STORAGE_S3_PRIVATE_REGION=eu-central-1
+        STORAGE_S3_PRIVATE_ENDPOINT=s3.amazonaws.com
+        STORAGE_S3_PUBLIC_DRIVER=s3
+        STORAGE_S3_PUBLIC_KEY=${{ secrets.AWS_ACCESS_KEY }}
+        STORAGE_S3_PUBLIC_SECRET=${{ secrets.AWS_SECRET_KEY }}
+        STORAGE_S3_PUBLIC_BUCKET=${{ secrets.PROD_S3_BUCKET }}
+        STORAGE_S3_PUBLIC_REGION=eu-central-1
+        STORAGE_S3_PUBLIC_ENDPOINT=s3.amazonaws.com
+        EXTENSIONS_PATH=./extensions
+        EXTENSIONS_AUTO_RELOAD=false
+        WEBSOCKETS_ENABLED=true
+        NODE_ENV=production
+        LOG_LEVEL=warn
+        CACHE_ENABLED=true
+        CORS_ENABLED=true
+        CORS_ORIGIN=https://grile.ro
+        RATE_LIMITER_ENABLED=true
+        ACCESS_TOKEN_TTL=15m
+        REFRESH_TOKEN_TTL=7d
+        REFRESH_TOKEN_COOKIE_SECURE=true
+        REFRESH_TOKEN_COOKIE_SAME_SITE=strict
+        ENVEOF
+        EOF
+
+    - name: Deploy with zero downtime
+      run: |
+        ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
+          cd ~/directus-infra
+          
+          # Pull latest Directus image
+          docker-compose -f docker-compose.prod.yml pull directus
+          
+          # Restart services with zero downtime
+          docker-compose -f docker-compose.prod.yml up -d directus
+          
+          # Wait for health check
+          echo "Waiting for Directus to be healthy..."
+          timeout 120 bash -c 'until docker-compose -f docker-compose.prod.yml ps directus | grep -q "healthy"; do sleep 5; done'
+          
+          # Clean up old images
+          docker image prune -f
+        EOF
+
+    - name: Verify deployment
+      run: |
+        # Check if service is responding
+        curl -f ${{ secrets.PROD_PUBLIC_URL }}/health || exit 1
+        echo "✅ Production deployment successful!"
+
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "❌ Production deployment failed!"
+        # Add notification logic here (Slack, Discord, etc.)
