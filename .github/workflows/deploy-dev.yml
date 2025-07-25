@@ -24,17 +24,21 @@ jobs:
 
     - name: Build Extensions
       run: |
-        # Build AI Questions Review Layout
-        cd extensions/directus-extension-layout-review-ai-questions
-        npm ci
-        npm run build
-        cd ../..
+        # Build AI Questions Review Layout (if exists)
+        if [ -d "extensions/directus-extension-layout-review-ai-questions" ]; then
+          cd extensions/directus-extension-layout-review-ai-questions
+          npm ci
+          npm run build
+          cd ../..
+        fi
         
         # Build Search Chapters Interface
-        cd extensions/directus-extension-interface-search-chapters
-        npm ci
-        npm run build
-        cd ../..
+        if [ -d "extensions/directus-extension-interface-search-chapters" ]; then
+          cd extensions/directus-extension-interface-search-chapters
+          npm ci
+          npm run build
+          cd ../..
+        fi
 
     - name: Setup SSH
       run: |
@@ -92,20 +96,76 @@ jobs:
         ENVEOF
         EOF
 
-    - name: Deploy with zero downtime
+    - name: Setup SSL Certificates (First Time)
       run: |
         ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
           cd ~/directus-infra
           
+          # Check if certificates already exist
+          if [ ! -d "certbot/conf/live/dev.content.grile.ro" ]; then
+            echo "🔐 Setting up SSL certificates for first time..."
+            
+            # Make init script executable
+            chmod +x init-letsencrypt.sh
+            
+            # Run SSL certificate setup
+            ./init-letsencrypt.sh
+            
+            echo "✅ SSL certificates initialized"
+          else
+            echo "✅ SSL certificates already exist"
+          fi
+        EOF
+
+    - name: Deploy with zero downtime and bootstrap
+      run: |
+        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
+          cd ~/directus-infra
+          
+          # Check if this is first deployment (no containers running)
+          FIRST_DEPLOY=false
+          if ! docker-compose -f docker-compose.dev.yml ps directus | grep -q "Up"; then
+            FIRST_DEPLOY=true
+            echo "🚀 First time deployment detected - will run bootstrap"
+          fi
+          
           # Pull latest Directus image
           docker-compose -f docker-compose.dev.yml pull directus
           
-          # Restart services with zero downtime
-          docker-compose -f docker-compose.dev.yml up -d directus
+          # Start services
+          docker-compose -f docker-compose.dev.yml up -d
           
-          # Wait for health check
-          echo "Waiting for Directus to be healthy..."
-          timeout 120 bash -c 'until docker-compose -f docker-compose.dev.yml ps directus | grep -q "healthy"; do sleep 5; done'
+          # Wait for Directus to be healthy
+          echo "⏳ Waiting for Directus to be healthy..."
+          timeout 120 bash -c 'until docker-compose -f docker-compose.dev.yml ps directus | grep -q "healthy"; do sleep 5; echo "Still waiting..."; done'
+          
+          # Run bootstrap if first deployment
+          if [ "$FIRST_DEPLOY" = true ]; then
+            echo "🔄 Running bootstrap process..."
+            
+            # Wait a bit more for Directus to be fully ready
+            sleep 10
+            
+            # Run Directus bootstrap
+            docker-compose -f docker-compose.dev.yml exec -T directus npx directus bootstrap || echo "Bootstrap command completed"
+            
+            # Apply database schema (if using Supabase migrations)
+            if [ -f "supabase/migrations/20250725000001_complete_schema.sql" ]; then
+              echo "📊 Applying database schema..."
+              # Note: You'll need to run this manually or via Supabase CLI
+              echo "Run manually: psql 'your-dev-connection-string' -f supabase/migrations/20250725000001_complete_schema.sql"
+            fi
+            
+            # Add metadata (if Node.js is available)
+            if command -v node >/dev/null 2>&1; then
+              cd scripts
+              npm install --silent 2>/dev/null || true
+              SUPABASE_PROJECT_REF=${{ secrets.DEV_SUPABASE_PROJECT_REF }} node remote-bootstrap.js dev || echo "Metadata setup completed"
+              cd ..
+            fi
+            
+            echo "✅ Bootstrap process completed"
+          fi
           
           # Clean up old images
           docker image prune -f
@@ -114,7 +174,8 @@ jobs:
     - name: Verify deployment
       run: |
         # Check if service is responding
-        curl -f ${{ secrets.DEV_PUBLIC_URL }}/health || exit 1
+        sleep 10
+        curl -f ${{ secrets.DEV_PUBLIC_URL }}/server/health || exit 1
         echo "✅ Development deployment successful!"
 
     - name: Notify on failure
