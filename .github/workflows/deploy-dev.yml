@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: development
     
     steps:
     - name: Checkout code
@@ -43,9 +44,9 @@ jobs:
     - name: Setup SSH
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.DEV_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.DEV_HOST }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
     - name: Deploy to Development Server
       run: |
@@ -56,29 +57,29 @@ jobs:
           --exclude='.env*' \
           --exclude='certbot/conf' \
           --exclude='uploads' \
-          ./ ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:~/directus-infra/
+          ./ ${{ secrets.USER }}@${{ secrets.HOST }}:~/directus-infra/
 
     - name: Create environment file on server
       run: |
-        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
+        ssh ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ~/directus-infra
           cat > .env.dev << 'ENVEOF'
-        KEY=${{ secrets.DEV_DIRECTUS_KEY }}
-        SECRET=${{ secrets.DEV_DIRECTUS_SECRET }}
-        ADMIN_EMAIL=${{ secrets.DEV_ADMIN_EMAIL }}
-        ADMIN_PASSWORD=${{ secrets.DEV_ADMIN_PASSWORD }}
-        PUBLIC_URL=${{ secrets.DEV_PUBLIC_URL }}
+        KEY=${{ secrets.DIRECTUS_KEY }}
+        SECRET=${{ secrets.DIRECTUS_SECRET }}
+        ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+        ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+        PUBLIC_URL=${{ secrets.PUBLIC_URL }}
         DB_CLIENT=pg
-        DB_HOST=${{ secrets.DEV_DB_HOST }}
+        DB_HOST=${{ secrets.DB_HOST }}
         DB_PORT=5432
         DB_DATABASE=postgres
-        DB_USER=${{ secrets.DEV_DB_USER }}
-        DB_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}
+        DB_USER=${{ secrets.DB_USER }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
         DB_SSL__REJECT_UNAUTHORIZED=false
         STORAGE_LOCATIONS=supabase
         STORAGE_SUPABASE_DRIVER=supabase
-        STORAGE_SUPABASE_PROJECT_URL=${{ secrets.SUPABASE_PROJECT_URL_DEV }}
-        STORAGE_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY_DEV }}
+        STORAGE_SUPABASE_PROJECT_URL=${{ secrets.SUPABASE_PROJECT_URL }}
+        STORAGE_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
         STORAGE_SUPABASE_BUCKET=directus-files
         EXTENSIONS_PATH=./extensions
         EXTENSIONS_AUTO_RELOAD=false
@@ -98,7 +99,7 @@ jobs:
 
     - name: Setup SSL Certificates (First Time)
       run: |
-        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
+        ssh ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ~/directus-infra
           
           # Check if certificates already exist
@@ -119,7 +120,7 @@ jobs:
 
     - name: Deploy with zero downtime and bootstrap
       run: |
-        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }} << 'EOF'
+        ssh ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ~/directus-infra
           
           # Check if this is first deployment (no containers running)
@@ -160,7 +161,7 @@ jobs:
             if command -v node >/dev/null 2>&1; then
               cd scripts
               npm install --silent 2>/dev/null || true
-              SUPABASE_PROJECT_REF=${{ secrets.DEV_SUPABASE_PROJECT_REF }} node remote-bootstrap.js dev || echo "Metadata setup completed"
+              SUPABASE_PROJECT_REF=${{ secrets.SUPABASE_PROJECT_REF }} node remote-bootstrap.js dev || echo "Metadata setup completed"
               cd ..
             fi
             
@@ -175,7 +176,7 @@ jobs:
       run: |
         # Check if service is responding
         sleep 10
-        curl -f ${{ secrets.DEV_PUBLIC_URL }}/server/health || exit 1
+        curl -f ${{ secrets.PUBLIC_URL }}/server/health || exit 1
         echo "✅ Development deployment successful!"
 
     - name: Notify on failure
