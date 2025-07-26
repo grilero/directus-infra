@@ -1,52 +1,23 @@
 # GitHub Repository Secrets Setup
 
-## 🌍 Using GitHub Environments (Best Practice)
+## 🎯 **Simplified Workflow**
 
-Instead of prefixing secrets with `DEV_` and `PROD_`, we use GitHub Environments which provide better security and organization.
+Your setup now matches your actual development process:
 
-### Step 1: Create Environments
+1. **Local Development** (`npm run dev`) → Connects to Supabase `grile-ro-dev` project
+2. **Production Deployment** (`git push origin main`) → Deploys to EC2 + Supabase `grile-ro-prod` project
+3. **No dev.content.grile.ro** (unnecessary complexity removed)
+
+## 🔐 Production Environment Secrets
 
 Go to: `https://github.com/grilero/directus-infra/settings/environments`
 
-Create two environments:
-1. **`development`** - for dev deployments
-2. **`production`** - for prod deployments (can add protection rules)
-
-### Step 2: Add Secrets to Each Environment
-
-## 🔐 Development Environment Secrets
-
-Go to: `https://github.com/grilero/directus-infra/settings/environments/development`
-
-Add these **9 clean secrets**:
+Create **one environment** called **`production`** and add these **9 secrets**:
 
 ```
 HOST = [Your EC2 instance IP address]
 USER = ubuntu
 SSH_PRIVATE_KEY = [Your SSH private key content]
-DIRECTUS_KEY = [Random 32+ character string for encryption]
-DIRECTUS_SECRET = [Random 32+ character string for JWT]
-ADMIN_EMAIL = [Your admin email for dev instance]
-ADMIN_PASSWORD = [Your admin password for dev instance]
-PUBLIC_URL = https://dev.content.grile.ro
-DB_HOST = [Your grile-ro-dev Supabase database host]
-DB_USER = [Your grile-ro-dev Supabase database user]
-DB_PASSWORD = [Your grile-ro-dev Supabase database password]
-SUPABASE_PROJECT_URL = [Your dev Supabase project URL]
-SUPABASE_ANON_KEY = [Your dev Supabase anon key]
-SUPABASE_PROJECT_REF = [Your dev Supabase project reference ID]
-```
-
-## 🔐 Production Environment Secrets
-
-Go to: `https://github.com/grilero/directus-infra/settings/environments/production`
-
-Add these **9 clean secrets** (same names, different values):
-
-```
-HOST = [Your EC2 instance IP address] (same as dev)
-USER = ubuntu
-SSH_PRIVATE_KEY = [Your SSH private key content] (same as dev)
 DIRECTUS_KEY = [Random 32+ character string for encryption]
 DIRECTUS_SECRET = [Random 32+ character string for JWT]
 ADMIN_EMAIL = [Your admin email for prod instance]
@@ -60,14 +31,47 @@ SUPABASE_ANON_KEY = [Your prod Supabase anon key]
 SUPABASE_PROJECT_REF = [Your prod Supabase project reference ID]
 ```
 
-## 🎯 How to Find These Values
+## 🏠 **Local Development Setup**
+
+For your local `npm run dev` to work with remote Supabase dev project, update your local environment files to point to `grile-ro-dev`:
+
+### Update `.env.local.example` → `.env.local`
+```bash
+# Local development with remote Supabase dev project
+DB_CLIENT=pg
+DB_HOST=[grile-ro-dev supabase host]
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USER=[grile-ro-dev user]
+DB_PASSWORD=[grile-ro-dev password]
+DB_SSL__REJECT_UNAUTHORIZED=false
+
+DIRECTUS_KEY=[your local dev key]
+DIRECTUS_SECRET=[your local dev secret]
+ADMIN_EMAIL=[your dev admin email]
+ADMIN_PASSWORD=[your dev admin password]
+PUBLIC_URL=http://localhost:8055
+
+# Supabase Storage for dev
+STORAGE_LOCATIONS=supabase
+STORAGE_SUPABASE_DRIVER=supabase
+STORAGE_SUPABASE_PROJECT_URL=[grile-ro-dev project URL]
+STORAGE_SUPABASE_ANON_KEY=[grile-ro-dev anon key]
+STORAGE_SUPABASE_BUCKET=directus-files
+
+EXTENSIONS_PATH=./extensions
+EXTENSIONS_AUTO_RELOAD=true
+NODE_ENV=development
+```
+
+## 🎯 **How to Find These Values**
 
 ### SSH Keys
 ```bash
 # Generate SSH key for GitHub Actions if you don't have one
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/directus_deploy -N ""
 
-# Copy private key content (this goes in SSH_PRIVATE_KEY for both environments)
+# Copy private key content (this goes in SSH_PRIVATE_KEY)
 cat ~/.ssh/directus_deploy
 
 # Copy public key to your EC2 authorized_keys
@@ -76,90 +80,59 @@ cat ~/.ssh/directus_deploy.pub >> ~/.ssh/authorized_keys
 
 ### Random Strings for Directus
 ```bash
-# Generate random keys (do this 4 times for the 4 key/secret pairs)
+# Generate random keys (do this 2 times for prod key/secret)
 openssl rand -base64 32
 ```
 
 ### Supabase Values
-1. Go to your Supabase projects
-2. **Dev Project**: `grile-ro-dev` 
+1. **Production Project**: `grile-ro-prod`
    - Database host: Settings → Database → Connection string host
    - Database user/password: From your connection string
    - Project URL: Settings → API → Project URL
    - Anon key: Settings → API → Project API keys → anon key
    - Project Ref: Found in project URL (e.g., `https://[project-ref].supabase.co`)
 
-3. **Prod Project**: `grile-ro-prod`
-   - Same steps as dev project
+2. **Development Project**: `grile-ro-dev` (for your local .env.local)
+   - Same steps as production project
 
-## ✅ Benefits of GitHub Environments
+## 🚀 **Deployment Flow**
 
-### 🔒 **Security**
-- Environment-specific access controls
-- Can require reviews for production deployments
-- Secrets are isolated per environment
-
-### 📝 **Clean Organization**
-- No prefixed secret names (`DIRECTUS_KEY` vs `DEV_DIRECTUS_KEY`)
-- Same secret names across environments
-- Clear separation of concerns
-
-### 🛡️ **Protection Rules** (Optional)
-You can add protection rules to the `production` environment:
-- Require reviewers before deployment
-- Restrict to specific branches
-- Add deployment delays
-
-## 🚀 What Happens on First Deployment
-
-### SSL Certificates
-- ✅ Automatically detects if certificates exist
-- ✅ Runs `init-letsencrypt.sh` to create Let's Encrypt certificates
-- ✅ Sets up certificates for both `dev.content.grile.ro` and `content.grile.ro`
-- ✅ Auto-renewal via certbot service
-
-### Bootstrap Process
-- ✅ Detects first-time deployment (no running containers)
-- ✅ Runs `npx directus bootstrap` to initialize Directus
-- ✅ Applies database schema from `supabase/migrations/`
-- ✅ Configures metadata via `scripts/remote-bootstrap.js`
-- ✅ Waits for health checks before completing
-
-## 🔍 After Adding Secrets
-
-1. **Test Development**: 
-   - Push to `dev` branch → Uses `development` environment secrets
-   - Deploys to `https://dev.content.grile.ro`
-
-2. **Test Production**: 
-   - Push to `main` branch → Uses `production` environment secrets
-   - Deploys to `https://content.grile.ro`
-
-## ✅ Verify Everything Is Working
-
-### Check Workflow Runs
-Go to: `https://github.com/grilero/directus-infra/actions`
-
-### Check SSL Certificates
+### Local Development
 ```bash
-curl -I https://dev.content.grile.ro
-curl -I https://content.grile.ro
+# Start with remote dev database
+npm run dev
 ```
 
-### Check Directus Health
+### Production Deployment
 ```bash
-curl https://dev.content.grile.ro/server/health
-curl https://content.grile.ro/server/health
+# Push to main triggers automatic deployment
+git push origin main
 ```
 
-## 🎉 Current Status
+### First Deployment Features
+- ✅ **SSL Certificate Setup**: Automatically creates Let's Encrypt certificate for `content.grile.ro`
+- ✅ **Bootstrap Process**: Runs Directus bootstrap + applies database schema
+- ✅ **Zero Downtime**: Health checks ensure successful deployment
+- ✅ **Rollback**: Manual rollback via git revert if needed
 
-- ✅ GitHub repository created
-- ✅ Dev branch created  
-- ✅ GitHub Actions workflows use environment-based secrets
-- ✅ SSL certificate automation included
-- ✅ First-time bootstrap process included
+## ✅ **After Adding Secrets**
+
+1. **Add the 9 secrets** to the `production` environment
+2. **Push to main branch**: 
+   ```bash
+   git push origin main
+   ```
+3. **Monitor deployment**: Check `https://github.com/grilero/directus-infra/actions`
+4. **Verify**: Visit `https://content.grile.ro/server/health`
+
+## 🎉 **Simplified Status**
+
+- ✅ Single GitHub environment (`production`)
 - ✅ Clean secret names (no DEV_/PROD_ prefixes)
-- 🔄 **Waiting for you to create environments and add the 9 secrets to each**
+- ✅ Local dev connects to remote Supabase dev project
+- ✅ Production deployment to EC2 + Supabase prod project
+- ✅ SSL certificate automation
+- ✅ AI question review stored procedures ready
+- 🔄 **Waiting for you to add the 9 production secrets**
 
-**This follows GitHub's best practices for environment management!** 🏆
+**Perfect! This matches your real development workflow.** 🎯
