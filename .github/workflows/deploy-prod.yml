@@ -63,7 +63,7 @@ jobs:
       run: |
         ssh ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ~/directus-infra
-          cat > .env.prod << 'ENVEOF'
+          cat > .env << 'ENVEOF'
         KEY=${{ secrets.DIRECTUS_KEY }}
         SECRET=${{ secrets.DIRECTUS_SECRET }}
         ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
@@ -123,22 +123,22 @@ jobs:
         ssh ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           cd ~/directus-infra
           
-          # Check if this is first deployment (no prod containers running)
+          # Check if this is first deployment (no containers running)
           FIRST_DEPLOY=false
-          if ! docker-compose -f docker-compose.prod.yml ps directus | grep -q "Up"; then
+          if ! docker-compose ps directus | grep -q "Up"; then
             FIRST_DEPLOY=true
             echo "🚀 First time production deployment detected - will run bootstrap"
           fi
           
           # Pull latest Directus image
-          docker-compose -f docker-compose.prod.yml pull directus
+          docker-compose pull directus
           
           # Start services
-          docker-compose -f docker-compose.prod.yml up -d
+          docker-compose up -d
           
           # Wait for Directus to be healthy
           echo "⏳ Waiting for Directus to be healthy..."
-          timeout 120 bash -c 'until docker-compose -f docker-compose.prod.yml ps directus | grep -q "healthy"; do sleep 5; echo "Still waiting..."; done'
+          timeout 120 bash -c 'until docker-compose ps directus | grep -q "healthy"; do sleep 5; echo "Still waiting..."; done'
           
           # Run bootstrap if first deployment
           if [ "$FIRST_DEPLOY" = true ]; then
@@ -148,14 +148,10 @@ jobs:
             sleep 10
             
             # Run Directus bootstrap
-            docker-compose -f docker-compose.prod.yml exec -T directus npx directus bootstrap || echo "Bootstrap command completed"
+            docker-compose exec -T directus npx directus bootstrap || echo "Bootstrap command completed"
             
-            # Apply database schema (if using Supabase migrations)
-            if [ -f "supabase/migrations/20250725000001_complete_schema.sql" ]; then
-              echo "📊 Applying database schema..."
-              # Note: You'll need to run this manually or via Supabase CLI
-              echo "Run manually: psql 'your-prod-connection-string' -f supabase/migrations/20250725000001_complete_schema.sql"
-            fi
+            # Apply database schema (migrations applied via Supabase)
+            echo "📊 Database schema should be applied via Supabase migrations"
             
             # Add metadata (if Node.js is available)
             if command -v node >/dev/null 2>&1; then
